@@ -1,0 +1,16 @@
+langchain
+transformers
+torch
+pypdf
+sentence-transformers
+accelerate
+bitsandbytes
+faiss-cpu
+langchain-community
+langchain-huggingface
+einops
+safetensors
+psycopg2-binary
+pgvector
+langchain-postgres
+sqlalchemy
