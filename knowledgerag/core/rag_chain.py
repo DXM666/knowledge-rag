@@ -5,10 +5,9 @@ RAG链模块
 """
 
 import logging
-from typing import Tuple, Optional, List, Dict, Any
+from typing import Tuple, Optional, Dict, Any
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-from langchain_core.documents import Document
 from langchain_huggingface import HuggingFacePipeline
 
 from knowledgerag.config.settings import PROMPT_TEMPLATE, RETRIEVER_CONFIG, GENERATION_CONFIG
@@ -177,30 +176,3 @@ class RAGChainBuilder:
         except Exception as e:
             logging.error(f"处理响应时出错: {str(e)}")
             return "", f"处理响应时出错: {str(e)}"
-
-    def retrieve_documents(self, query: str) -> List[Document]:
-        """
-        检索相关文档
-
-        参数:
-            query (str): 查询文本
-
-        返回:
-            List[Document]: 检索到的文档列表
-        """
-        try:
-            # 初始化向量存储
-            vector_store = FaissVectorStore()
-
-            # 加载向量存储
-            success = vector_store.load_or_create()
-            if not success:
-                raise ValueError("加载向量存储失败")
-
-            # 检索文档
-            documents = vector_store.similarity_search(query, k=self.top_k)
-            return documents
-
-        except Exception as e:
-            logging.error(f"检索文档时出错: {str(e)}")
-            return []

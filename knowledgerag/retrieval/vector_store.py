@@ -6,10 +6,9 @@
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 import numpy as np
 import faiss
-from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from knowledgerag.db.postgres import PostgresManager
@@ -211,47 +210,6 @@ class FaissVectorStore:
         except Exception as e:
             logging.error(f"从PostgreSQL构建FAISS索引时出错: {str(e)}")
             return False
-
-    def similarity_search(
-        self, query: str, k: int = 4, use_postgres: bool = False
-    ) -> List[Document]:
-        """
-        使用向量相似度搜索文档
-
-        参数:
-            query (str): 查询文本
-            k (int): 返回的文档数量
-            use_postgres (bool): 是否使用PostgreSQL进行搜索
-
-        返回:
-            List[Document]: 相似文档列表
-        """
-        try:
-            if use_postgres:
-                # 使用PostgreSQL进行搜索
-                if not self.embedding_model:
-                    logging.error("嵌入模型未初始化")
-                    return []
-
-                # 获取查询向量
-                query_vector = self.embedding_model.get_embeddings().embed_query(query)
-
-                # 使用PostgreSQL进行搜索
-                return self.db_manager.similarity_search(query_vector, k)
-            else:
-                # 使用FAISS进行搜索
-                if not self.vector_store:
-                    success = self.load_or_create()
-                    if not success:
-                        return []
-
-                # 执行相似度搜索
-                documents = self.vector_store.similarity_search(query, k=k)
-                return documents
-
-        except Exception as e:
-            logging.error(f"执行相似度搜索时出错: {str(e)}")
-            return []
 
     def as_retriever(self, search_kwargs: Optional[Dict[str, Any]] = None):
         """

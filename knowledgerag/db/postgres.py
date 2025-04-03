@@ -212,55 +212,6 @@ class PostgresManager:
             if cursor:
                 cursor.close()
 
-    def similarity_search(
-        self, query_vector: List[float], k: int = 4
-    ) -> List[Document]:
-        """
-        使用向量相似度搜索文档
-
-        参数:
-            query_vector (List[float]): 查询向量
-            k (int): 返回的文档数量
-
-        返回:
-            List[Document]: 相似文档列表
-        """
-        try:
-            if not self.conn:
-                success = self.connect()
-                if not success:
-                    return []
-
-            # 创建游标
-            cursor = self.conn.cursor()
-
-            # 执行相似度搜索
-            query = f"""
-            SELECT content, metadata
-            FROM {self.table_name}
-            ORDER BY embedding <-> %s::vector
-            LIMIT %s;
-            """
-            cursor.execute(query, (query_vector, k))
-
-            # 获取结果
-            results = cursor.fetchall()
-
-            # 转换为Document对象
-            documents = []
-            for content, metadata in results:
-                doc = Document(page_content=content, metadata=metadata)
-                documents.append(doc)
-
-            return documents
-
-        except Exception as e:
-            logging.error(f"执行相似度搜索时出错: {str(e)}")
-            return []
-        finally:
-            if cursor:
-                cursor.close()
-
     def save_faiss_index(self, index_name: str, faiss_index) -> bool:
         """
         将FAISS索引保存到PostgreSQL
